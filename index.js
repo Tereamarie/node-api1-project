@@ -1,68 +1,71 @@
-//Boiler plate Node index.js set up //
-const express = require("express");
-
+const express = require('express');
 const shortid = require("shortid");
 
-
-
 const server = express();
-let hubs = [];
-
-// Create
-// Read
-// Update
-//Delete
-//CRUD
-
-
-//GET/
-
 server.use(express.json());
+let users = [];
 
-server.get('/', (req, res) => {
-    res.json({hello: 'world'}); 
-});
 
-server.get('/api/users', (req, res) => {
-  res.json({hello: "Lambda School"});  
-});
+ server.get('/', (req, res) => {
+  res.json('Hello World');
+ });
 
-//Create/
-server.post('/api/users/:id', (req, res) => {
-    const userData = req.body;
-    userData.id = shortid.generate();
+ server.get('/api/users', (req, res)=> {
+   Users.find()
+   .then(users => {
+     res.status(200).json(users);
+   })
+   .catch(err => {
+     console.log(err);
+     res
+     .status(500).json( { errorMessage: "The users information could not be retrieved." })
+   })
+ })
+
+ server.get('/api/users/:id', (req, res) => {
+   const id = req.params.id;
+   Users.findById(id) 
+   .then(user => {
+     if (user) {
+      res.status(200).json(user);
+     }
+     else {
+       res.status(404).json({ message: "The user with the specified ID does not exist." 
+       })
+
+     }
      
-    users.push(userData);
-    res.status(201).json(userData);
+   })
+   .catch(err => {
+     console.log(err);
+     res.status(500).json( { errorMessage: "The user information could not be retrieved." } )
+   })
+ })
 
-})
+server.post('/api/users', (req, res) => {
+  const userData = req.body;
+  Users.insert(userData)
+  .then(user => {
+    res.status(201).json(hub);
+  })
+  .catch(error => {
+    console.log(error);
+    res.status(400).json( { errorMessage: "Please provide name and bio for the user." } )
+  });
+});
 
-
-// Read
-
-server.get('/api/users', (req, res) => {
-   res.json(users);
-})
-
-// Delete
-
-server.delete('/api/users/:id', (req, res) => {
-  const {id} = req.params;
-
-  const deleted = users.find(users => users.id ===id);
-
-  if (deleted) {
-      users = users.filter(users => users.id !== id);
-      res.status(200).json(deleted);
-  }
-  else {
-   res.status(404).json({message: 'Users  not found'});
-  }
-})
-
-
-
-//Update-change
+ server.delete('/api/users/:id', (req, res) => {
+   const id = req.params.id;
+   Users.remove(id)
+   .then(deleted => {
+     res.status(200). json(deleted);
+   })
+   .catch(error => {
+     console.log(error);
+     res.status(404).json( { message: "The user with the specified ID does not exist." }
+     )
+   })
+ })
 
 server.patch('/api/users/:id', (req, res)  => {
   const {id} = req.params;
@@ -74,29 +77,9 @@ server.patch('/api/users/:id', (req, res)  => {
     res.status(200).json(found);
 
   } else {
-    res.status(404).json({message: 'Hub not found'});
+    res.status(404).json({message: 'user not found'});
   }
 })
 
+ server.listen(8000, () => console.log('API Running on port 8000'));
 
-
-//update-replace
-
-server.put('/api/users/:id', (req, res) => {
-    const { id } = req.params;
-    const changes = req.body;
-    changes.id = id;
-
-    let index = users.findIndex(users => users.id === id);
-    if (index !== -1) {
-        users[index] = changes;
-        res.status(200).json(users[index]);
-    } else {
-        res.status(404).json({ message: 'users id not found'});
-    }
-});
-
-const PORT = 5000;
-server.listen(PORT, () => {
-  console.log('Listening on localhost:', PORT);
-})
